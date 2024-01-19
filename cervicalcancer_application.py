@@ -93,9 +93,12 @@ def main():
     try:
         Years_of_hormonal_contraceptives = st.text_input('How long has the patient been on hormonal_contraceptives',"0",key="yearsofhormonal_Contracept")
         Years_of_hormonal_contraceptives=float(Years_of_hormonal_contraceptives)
+        
     except ValueError:
-        st.write("you are to insert a number")
+        st.write("Insert a number")
 
+    st.write("\n")
+    
     option2 = st.selectbox("Presence of Intrauterine Device (IUD) in patients",("",'Yes', 'No'),key="IUD")
     if (option2=='Yes'):
         iud=1        
@@ -113,8 +116,15 @@ def main():
         std=0
     
     # std_number = st.number_input("number of STDs")
-    std_number = st.text_input('number of STDs',"0", key="std_number")
-    std_number=float(std_number)
+    
+    try:
+        std_number = st.text_input('number of STDs',"0", key="std_number")
+        std_number=float(std_number)
+    except ValueError:
+        st.write("Insert a number")
+
+    st.write("\n")
+
 
 
     option4 = st.selectbox("Is condylomatosis present ?",("",'Yes', 'No'),key="the_std_condylomatosis")
@@ -150,8 +160,13 @@ def main():
         HIV=0  
     
 
-    Number_of_diagnosis = st.text_input('number of STD diagnosis',"0", key="diagnosis_times")
-    Number_of_diagnosis=float(Number_of_diagnosis)
+    try:
+        Number_of_diagnosis = st.text_input('number of STD diagnosis',"0", key="diagnosis_times")
+        Number_of_diagnosis=float(Number_of_diagnosis)
+    except ValueError:
+        st.write("Insert a number")
+
+    st.write("\n")
 
 
         
