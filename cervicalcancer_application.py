@@ -95,7 +95,7 @@ def main():
         Years_of_hormonal_contraceptives=float(Years_of_hormonal_contraceptives)
         
     except ValueError:
-        st.write("Insert a number")
+        st.error("Wrong Input")
 
     st.write("\n")
     
@@ -121,7 +121,7 @@ def main():
         std_number = st.text_input('number of STDs',"0", key="std_number")
         std_number=float(std_number)
     except ValueError:
-        st.write("Insert a number")
+        st.error("Wrong Input")
 
     st.write("\n")
 
@@ -164,7 +164,7 @@ def main():
         Number_of_diagnosis = st.text_input('number of STD diagnosis',"0", key="diagnosis_times")
         Number_of_diagnosis=float(Number_of_diagnosis)
     except ValueError:
-        st.write("Insert a number")
+        st.error("Wrong Input")
 
     st.write("\n")
 
