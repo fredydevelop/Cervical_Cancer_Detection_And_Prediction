@@ -90,10 +90,10 @@ def main():
     Num_of_pregnancies = st.slider('Num of pregnancies', 0, 80, key="num_pregnancies")
 
 
-   try:
-    Years_of_hormonal_contraceptives = st.text_input('How long has the patient been on hormonal_contraceptives',"0",key="yearsofhormonal_Contracept")
-    Years_of_hormonal_contraceptives=float(Years_of_hormonal_contraceptives)
-    except:
+    try:
+        Years_of_hormonal_contraceptives = st.text_input('How long has the patient been on hormonal_contraceptives',"0",key="yearsofhormonal_Contracept")
+        Years_of_hormonal_contraceptives=float(Years_of_hormonal_contraceptives)
+    except ValueError:
         st.write("you are to insert a number")
 
     option2 = st.selectbox("Presence of Intrauterine Device (IUD) in patients",("",'Yes', 'No'),key="IUD")
