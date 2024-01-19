@@ -95,8 +95,8 @@ def main():
         Years_of_hormonal_contraceptives=float(Years_of_hormonal_contraceptives)
         
     except ValueError:
-        if Years_of_hormonal_contraceptives==""
-            st.error("Insert the years of Hormonal Contraceptives"
+        if Years_of_hormonal_contraceptives=="":
+            st.error("Insert the years of Hormonal Contraceptives")
         else:
             st.error("Wrong Input")
 
