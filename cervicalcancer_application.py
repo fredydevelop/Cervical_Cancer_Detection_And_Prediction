@@ -98,7 +98,7 @@ def main():
         if Years_of_hormonal_contraceptives=="":
             st.error("Insert the years of Hormonal Contraceptives")
         else:
-            st.error("Wrong Input")
+            st.error("This field can't be empty")
 
     st.write("\n")
     
@@ -124,7 +124,7 @@ def main():
         std_number = st.text_input('number of STDs',"0", key="std_number")
         std_number=float(std_number)
     except ValueError:
-        st.error("Wrong Input")
+        st.error("This field can't be empty")
 
     st.write("\n")
 
@@ -167,7 +167,7 @@ def main():
         Number_of_diagnosis = st.text_input('number of STD diagnosis',"0", key="diagnosis_times")
         Number_of_diagnosis=float(Number_of_diagnosis)
     except ValueError:
-        st.error("Wrong Input")
+        st.error("This field can't be empty")
 
     st.write("\n")
 
