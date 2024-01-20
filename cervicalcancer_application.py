@@ -265,7 +265,7 @@ def multi(input_data):
                 interchange.append(newip)
             
         st.subheader('**Predicted output**')
-        prediction_output = pd.Series(prediction, name='Biopsy')
+        prediction_output = pd.Series(interchange, name='Biopsy')
         prediction_id = pd.Series(np.arange(0, len(prediction_output)))
 
         dfresult = pd.concat([prediction_id, prediction_output], axis=1)
