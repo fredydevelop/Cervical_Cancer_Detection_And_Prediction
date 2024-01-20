@@ -228,7 +228,7 @@ def main():
 
 def multi(input_data):
     loaded_model=pk.load(open("The_Cervical_Cancer_Model.sav", "rb"))
-    dfinput = pd.read_csv(input_data,header=None)
+    dfinput = pd.read_csv(input_data)
     
     st.header('Dataset')
     st.markdown('Preview of the uploaded dataset')
@@ -236,7 +236,7 @@ def multi(input_data):
     #st.markdown(dfinput.shape)
     st.write("\n")
     st.write("\n")
-    dfinput=dfinput.iloc[1:].reset_index(drop=True)
+    #dfinput=dfinput.iloc[1:].reset_index(drop=True)
     
 
     std_scaler=pk.load(open("my_saved_CervicalCancer_std_scaler.pkl", "rb"))
