@@ -96,9 +96,9 @@ def main():
         
     except ValueError:
         if Years_of_hormonal_contraceptives=="":
-            st.error("Insert the years of Hormonal Contraceptives")
-        else:
             st.error("This field can't be empty")
+        else:
+            st.error("Invalid input, Enter the correct input")
 
     st.write("\n")
     
