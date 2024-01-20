@@ -257,7 +257,7 @@ def multi(input_data):
         prediction = loaded_model.predict(dfinput)
         interchange=[]
         for i in prediction:
-            if i==0:
+            if i==0 or i=="0":
                 newi="No Cervical Cancer detected"
                 interchange.append(newi)
             else:
