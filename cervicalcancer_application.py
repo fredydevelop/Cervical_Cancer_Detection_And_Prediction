@@ -269,7 +269,7 @@ def multi(input_data):
         prediction_id = pd.Series(np.arange(0, len(prediction_output)))
 
         dfresult = pd.concat([prediction_id, prediction_output], axis=1)
-        st.dataframe(prediction_output)
+        st.dataframe(dfresult)
         st.markdown(filedownload(dfresult), unsafe_allow_html=True)
         
 
