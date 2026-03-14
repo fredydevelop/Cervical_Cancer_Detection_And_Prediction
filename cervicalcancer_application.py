@@ -77,7 +77,7 @@ def main():
     num_of_pregnancies = st.slider("Number of pregnancies", 0, 30, key="num_pregnancies")
 
     years_of_hormonal_contraceptives = parse_float_input(
-        "How long has the patient been on hormonal contraceptives?",
+        "How long has the patient been on hormonal contraceptives? (Years)",
         "0",
         "yearsofhormonal_contracept"
     )
