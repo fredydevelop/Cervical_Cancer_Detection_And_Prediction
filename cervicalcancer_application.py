@@ -257,7 +257,7 @@ def multi(input_data):
 
 with st.sidebar:
     #selection=option_menu(menu_title="Main Menu",options=["Single Prediction","Multi Prediction","Model Performance"],icons=["cast","book","cast"],menu_icon="house",default_index=0)
-    st.image("Hepatitisclogo.png",width=250)
+    #st.image("Hepatitisclogo.png",width=250)
     selection = st.radio(
     "Choose your prediction system",
     ["Single Prediction", "Multi Prediction"])
