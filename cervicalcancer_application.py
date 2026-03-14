@@ -38,7 +38,7 @@ def parse_float_input(label: str, default_value: str, key: str):
 
 @st.cache_resource
 def load_single_prediction_model():
-    with open("my_saved_CervicalCancer_std_scaler.pkl", "rb") as f:
+    with open(The_Cervical_Cancer_Model.sav", "rb") as f:
         return pk.load(f)
 
 
