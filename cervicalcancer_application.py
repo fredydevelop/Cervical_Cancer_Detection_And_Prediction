@@ -236,6 +236,7 @@ def multi(input_data):
 
 
 with st.sidebar:
+    st.image("cervical_logo.jpg")
     selection = st.radio(
         "Choose your prediction system",
         ["Single Prediction", "Multi Prediction"]
