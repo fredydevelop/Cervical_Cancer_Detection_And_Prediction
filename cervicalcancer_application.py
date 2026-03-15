@@ -6,7 +6,7 @@ import pandas as pd
 import streamlit as st
 from streamlit_option_menu import option_menu  # keep only if you still want to use it
 
-st.set_page_config(page_title="Cervical Cancer Detection", layout="centered")
+st.set_page_config(page_title="CervixAI ", layout="centered")
 
 train_data_header_names = [
     'Age', 'Num of pregnancies', 'Hormonal Contraceptives (years)', 'IUD',
@@ -69,7 +69,7 @@ def eligibility_status(givendata):
 
 
 def main():
-    st.header("Cervical Cancer Detection System")
+    st.header("CervixAI ")
 
     age = st.slider("Patient age", 0, 120, key="ageslide")
     st.write(f"Patient is {age} years old")
