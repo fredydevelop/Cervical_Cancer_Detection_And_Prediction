@@ -357,16 +357,16 @@ def multi(input_data):
             dfresult = pd.concat([prediction_id, prediction_output, explanation_output], axis=1)
             st.dataframe(dfresult)
             st.markdown(filedownload(dfresult), unsafe_allow_html=True)
-    except FileNotFoundError as e:
-        st.error(f"Required file not found: {e}")
-    except pd.errors.EmptyDataError:
-        st.error("The uploaded CSV file is empty.")
-    except pd.errors.ParserError:
-        st.error("Unable to read the uploaded CSV file. Please upload a valid CSV.")
-    except ValueError as e:
-        st.error(f"Data format error: {e}")
-    except Exception as e:
-        st.error(f"An unexpected error occurred: {e}")
+        except FileNotFoundError as e:
+            st.error(f"Required file not found: {e}")
+        except pd.errors.EmptyDataError:
+            st.error("The uploaded CSV file is empty.")
+        except pd.errors.ParserError:
+            st.error("Unable to read the uploaded CSV file. Please upload a valid CSV.")
+        except ValueError as e:
+            st.error(f"Data format error: {e}")
+        except Exception as e:
+            st.error(f"An unexpected error occurred: {e}")
 
 
 with st.sidebar:
