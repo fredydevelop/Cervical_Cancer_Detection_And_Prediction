@@ -1,6 +1,6 @@
 import base64
 import pickle as pk
-
+import shap
 import numpy as np
 import pandas as pd
 import streamlit as st
@@ -54,18 +54,128 @@ def load_scaler():
         return pk.load(f)
 
 
+@st.cache_resource
+def load_shap_background():
+    """
+    Loads background data used by SHAP.
+    Save a small standardized training sample as a CSV or pickle.
+    Recommended shape: 50 to 100 rows.
+    """
+    bg = pd.read_csv("shap_background_data.csv")
+    return bg
+
+
+@st.cache_resource
+def load_shap_explainer():
+    model = load_single_prediction_model()
+    background = load_shap_background()
+    explainer = shap.KernelExplainer(model.predict_proba, background)
+    return explainer
+
+
+def safe_flatten_shap_values(shap_values):
+    """
+    Handles different SHAP output formats.
+    Returns 1D SHAP values for positive class.
+    """
+    if isinstance(shap_values, list):
+        return np.array(shap_values[1]).flatten()
+
+    shap_values = np.array(shap_values)
+
+    if shap_values.ndim == 3:
+        return shap_values[0, :, 1]
+    elif shap_values.ndim == 2:
+        return shap_values[0]
+    else:
+        return shap_values.flatten()
+
+
+def build_plain_english_explanation(original_row_df, scaled_row_df, positive_only=True, top_n=3):
+    """
+    original_row_df: one-row DataFrame with original values
+    scaled_row_df: one-row DataFrame with standardized values
+    """
+    model = load_single_prediction_model()
+    explainer = load_shap_explainer()
+
+    pred_class = model.predict(scaled_row_df)[0]
+    pred_prob = model.predict_proba(scaled_row_df)[0][1]
+
+    shap_values = explainer.shap_values(scaled_row_df)
+    patient_shap = safe_flatten_shap_values(shap_values)
+
+    explanation_df = pd.DataFrame({
+        "Feature": train_data_header_names,
+        "Original Value": original_row_df.iloc[0].values,
+        "SHAP Value": patient_shap
+    })
+
+    explanation_df["Abs SHAP"] = explanation_df["SHAP Value"].abs()
+    explanation_df = explanation_df.sort_values("Abs SHAP", ascending=False)
+
+    positive_drivers = explanation_df[explanation_df["SHAP Value"] > 0].head(top_n)
+    negative_drivers = explanation_df[explanation_df["SHAP Value"] < 0].head(top_n)
+
+    if pred_class == 0:
+        return f"The model predicts no cervical cancer with probability {1 - pred_prob:.1%}."
+
+    if positive_only:
+        if len(positive_drivers) == 0:
+            return f"The model predicts cervical cancer with probability {pred_prob:.1%}, but no strong positive drivers were identified."
+
+        phrases = []
+        for _, row in positive_drivers.iterrows():
+            feature = row["Feature"]
+            value = row["Original Value"]
+            phrases.append(f"{feature} ({value})")
+
+        joined = ", ".join(phrases[:-1]) + f" and {phrases[-1]}" if len(phrases) > 1 else phrases[0]
+
+        return f"The model predicts cervical cancer with probability {pred_prob:.1%}. The main factors increasing this prediction were {joined}."
+
+    else:
+        pos_text = ""
+        neg_text = ""
+
+        if len(positive_drivers) > 0:
+            pos_parts = [f"{row['Feature']} ({row['Original Value']})" for _, row in positive_drivers.iterrows()]
+            pos_text = "The main factors increasing the risk were " + (
+                ", ".join(pos_parts[:-1]) + f" and {pos_parts[-1]}" if len(pos_parts) > 1 else pos_parts[0]
+            ) + ". "
+
+        if len(negative_drivers) > 0:
+            neg_parts = [f"{row['Feature']} ({row['Original Value']})" for _, row in negative_drivers.iterrows()]
+            neg_text = "Factors slightly reducing the risk were " + (
+                ", ".join(neg_parts[:-1]) + f" and {neg_parts[-1]}" if len(neg_parts) > 1 else neg_parts[0]
+            ) + "."
+
+        return f"The model predicts cervical cancer with probability {pred_prob:.1%}. {pos_text}{neg_text}".strip()
+
+
 def eligibility_status(givendata):
     loaded_model = load_single_prediction_model()
+    scaler = load_scaler()
 
     input_data_as_numpy_array = np.asarray(givendata, dtype=float)
     input_data_reshaped = input_data_as_numpy_array.reshape(1, -1)
-    new_input_data = pd.DataFrame(input_data_reshaped, columns=train_data_header_names)
 
-    prediction = loaded_model.predict(new_input_data)
+    original_input_df = pd.DataFrame(input_data_reshaped, columns=train_data_header_names)
+    scaled_input = scaler.transform(original_input_df)
+    scaled_input_df = pd.DataFrame(scaled_input, columns=train_data_header_names)
+
+    prediction = loaded_model.predict(scaled_input_df)
 
     if prediction[0] == 0:
-        return "No cervical cancer detected"
-    return "Cervical cancer is present"
+        return "No cervical cancer detected", None
+
+    explanation = build_plain_english_explanation(
+        original_row_df=original_input_df,
+        scaled_row_df=scaled_input_df,
+        positive_only=True,
+        top_n=3
+    )
+    return "Cervical cancer is present", explanation
 
 
 def main():
@@ -162,7 +272,7 @@ def main():
             return
 
         try:
-            result = eligibility_status([
+            result, explanation = eligibility_status([
                 age,
                 num_of_pregnancies,
                 years_of_hormonal_contraceptives,
@@ -179,11 +289,16 @@ def main():
                 diagnosed_hpv,
                 other_diagnosis
             ])
+            
             st.success(result)
-        except FileNotFoundError:
-            st.error("Model file not found. Please make sure the model file is in the app directory.")
-        except Exception as e:
-            st.error(f"Prediction failed: {e}")
+            
+            if explanation is not None:
+                st.subheader("Why the model predicted this")
+                st.write(explanation)
+                    except FileNotFoundError:
+                        st.error("Model file not found. Please make sure the model file is in the app directory.")
+                    except Exception as e:
+                        st.error(f"Prediction failed: {e}")
 
 
 def multi(input_data):
@@ -208,21 +323,40 @@ def multi(input_data):
         if predict_button:
             prediction = loaded_model.predict(dfinput_scaled)
 
-            interchange = []
-            for i in prediction:
-                if i == 0 or i == "0":
-                    interchange.append("No Cervical Cancer detected")
+            scaled_df = pd.DataFrame(dfinput_scaled, columns=train_data_header_names)
+
+            labels = []
+            explanations = []
+
+            for idx, pred in enumerate(prediction):
+                original_row = dfinput.iloc[[idx]].copy()
+                scaled_row = scaled_df.iloc[[idx]].copy()
+
+                if pred == 0 or pred == "0":
+                    labels.append("No Cervical Cancer detected")
+                    explanations.append("Prediction indicates no cervical cancer.")
                 else:
-                    interchange.append("Cervical Cancer is present")
+                    labels.append("Cervical Cancer is present")
+                    try:
+                        explanation = build_plain_english_explanation(
+                            original_row_df=original_row,
+                            scaled_row_df=scaled_row,
+                            positive_only=True,
+                            top_n=3
+                        )
+                    except Exception:
+                        explanation = "Positive prediction. Main risk drivers could not be generated."
+                    explanations.append(explanation)
 
             st.subheader("Predicted output")
-            prediction_output = pd.Series(interchange, name="Biopsy")
-            prediction_id = pd.Series(np.arange(0, len(prediction_output)), name="ID")
 
-            dfresult = pd.concat([prediction_id, prediction_output], axis=1)
+            prediction_output = pd.Series(labels, name="Biopsy")
+            prediction_id = pd.Series(np.arange(0, len(prediction_output)), name="ID")
+            explanation_output = pd.Series(explanations, name="Explanation")
+
+            dfresult = pd.concat([prediction_id, prediction_output, explanation_output], axis=1)
             st.dataframe(dfresult)
             st.markdown(filedownload(dfresult), unsafe_allow_html=True)
-
     except FileNotFoundError as e:
         st.error(f"Required file not found: {e}")
     except pd.errors.EmptyDataError:
