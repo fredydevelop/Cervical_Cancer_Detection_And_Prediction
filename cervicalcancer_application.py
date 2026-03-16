@@ -4,7 +4,7 @@ import shap
 import numpy as np
 import pandas as pd
 import streamlit as st
-from streamlit_option_menu import option_menu  # keep only if you still want to use it
+from streamlit_option_menu import option_menu
 
 st.set_page_config(page_title="CervixAI ", layout="centered")
 
@@ -56,11 +56,6 @@ def load_scaler():
 
 @st.cache_resource
 def load_shap_background():
-    """
-    Loads background data used by SHAP.
-    Save a small standardized training sample as a CSV or pickle.
-    Recommended shape: 50 to 100 rows.
-    """
     bg = pd.read_csv("shap_background_data.csv")
     return bg
 
@@ -74,10 +69,6 @@ def load_shap_explainer():
 
 
 def safe_flatten_shap_values(shap_values):
-    """
-    Handles different SHAP output formats.
-    Returns 1D SHAP values for positive class.
-    """
     if isinstance(shap_values, list):
         return np.array(shap_values[1]).flatten()
 
@@ -92,10 +83,6 @@ def safe_flatten_shap_values(shap_values):
 
 
 def build_plain_english_explanation(original_row_df, scaled_row_df, positive_only=True, top_n=3):
-    """
-    original_row_df: one-row DataFrame with original values
-    scaled_row_df: one-row DataFrame with standardized values
-    """
     model = load_single_prediction_model()
     explainer = load_shap_explainer()
 
@@ -134,23 +121,22 @@ def build_plain_english_explanation(original_row_df, scaled_row_df, positive_onl
 
         return f"The model predicts cervical cancer with probability {pred_prob:.1%}. The main factors increasing this prediction were {joined}."
 
-    else:
-        pos_text = ""
-        neg_text = ""
+    pos_text = ""
+    neg_text = ""
 
-        if len(positive_drivers) > 0:
-            pos_parts = [f"{row['Feature']} ({row['Original Value']})" for _, row in positive_drivers.iterrows()]
-            pos_text = "The main factors increasing the risk were " + (
-                ", ".join(pos_parts[:-1]) + f" and {pos_parts[-1]}" if len(pos_parts) > 1 else pos_parts[0]
-            ) + ". "
+    if len(positive_drivers) > 0:
+        pos_parts = [f"{row['Feature']} ({row['Original Value']})" for _, row in positive_drivers.iterrows()]
+        pos_text = "The main factors increasing the risk were " + (
+            ", ".join(pos_parts[:-1]) + f" and {pos_parts[-1]}" if len(pos_parts) > 1 else pos_parts[0]
+        ) + ". "
 
-        if len(negative_drivers) > 0:
-            neg_parts = [f"{row['Feature']} ({row['Original Value']})" for _, row in negative_drivers.iterrows()]
-            neg_text = "Factors slightly reducing the risk were " + (
-                ", ".join(neg_parts[:-1]) + f" and {neg_parts[-1]}" if len(neg_parts) > 1 else neg_parts[0]
-            ) + "."
+    if len(negative_drivers) > 0:
+        neg_parts = [f"{row['Feature']} ({row['Original Value']})" for _, row in negative_drivers.iterrows()]
+        neg_text = "Factors slightly reducing the risk were " + (
+            ", ".join(neg_parts[:-1]) + f" and {neg_parts[-1]}" if len(neg_parts) > 1 else neg_parts[0]
+        ) + "."
 
-        return f"The model predicts cervical cancer with probability {pred_prob:.1%}. {pos_text}{neg_text}".strip()
+    return f"The model predicts cervical cancer with probability {pred_prob:.1%}. {pos_text}{neg_text}".strip()
 
 
 def eligibility_status(givendata):
@@ -289,16 +275,17 @@ def main():
                 diagnosed_hpv,
                 other_diagnosis
             ])
-            
+
             st.success(result)
-            
+
             if explanation is not None:
                 st.subheader("Why the model predicted this")
                 st.write(explanation)
-                    except FileNotFoundError:
-                        st.error("Model file not found. Please make sure the model file is in the app directory.")
-                    except Exception as e:
-                        st.error(f"Prediction failed: {e}")
+
+        except FileNotFoundError:
+            st.error("Model file not found. Please make sure the model file is in the app directory.")
+        except Exception as e:
+            st.error(f"Prediction failed: {e}")
 
 
 def multi(input_data):
@@ -357,6 +344,7 @@ def multi(input_data):
             dfresult = pd.concat([prediction_id, prediction_output, explanation_output], axis=1)
             st.dataframe(dfresult)
             st.markdown(filedownload(dfresult), unsafe_allow_html=True)
+
     except FileNotFoundError as e:
         st.error(f"Required file not found: {e}")
     except pd.errors.EmptyDataError:
