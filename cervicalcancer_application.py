@@ -161,7 +161,7 @@ def eligibility_status(givendata):
         positive_only=True,
         top_n=3
     )
-    return "Cervical cancer is present", explanation
+    return "Possible Cervical cancer detected", explanation
 
 
 def main():
@@ -323,7 +323,7 @@ def multi(input_data):
                     labels.append("No Cervical Cancer detected")
                     explanations.append("Prediction indicates no cervical cancer.")
                 else:
-                    labels.append("Cervical Cancer is present")
+                    labels.append("Possible Cervical cancer detected")
                     try:
                         explanation = build_plain_english_explanation(
                             original_row_df=original_row,
